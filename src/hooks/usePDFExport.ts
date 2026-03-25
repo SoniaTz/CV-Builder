@@ -21,6 +21,8 @@ export const usePDFExport = () => {
       clonedElement.style.transform = 'none';
       clonedElement.style.transformOrigin = 'top left';
       clonedElement.style.marginBottom = '0';
+      clonedElement.style.position = 'relative';
+      clonedElement.style.left = 'auto';
       
       // Set proper A4 dimensions
       clonedElement.style.width = '210mm';

@@ -477,12 +477,14 @@ const PageContainer = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
             else (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }
         }}
-        className="absolute opacity-0 pointer-events-none"
+        className="pointer-events-none"
         style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
           width: '210mm',
           fontSize: '11pt',
-          left: 0,
-          top: 0
+          background: 'white'
         }}
       >
         {children}
