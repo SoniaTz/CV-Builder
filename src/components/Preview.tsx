@@ -599,7 +599,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(({ onExportPDF }, ref) 
   const [zoom, setZoom] = useState(50);
   
   return (
-    <div className={`w-full bg-gray-100 border-l border-gray-200 flex flex-col h-full ${zoom > 50 ? 'sm:w-auto sm:flex-1' : 'sm:w-96'}`}>
+    <div className="w-full sm:w-96 bg-gray-100 border-l border-gray-200 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
         <h2 className="text-lg font-semibold text-gray-900">{t.livePreview}</h2>
