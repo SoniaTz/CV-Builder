@@ -652,7 +652,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(({ onExportPDF }, ref) 
       </div>
 
       {/* Preview Content - scrollable area */}
-      <div className="flex-1 overflow-x-hidden overflow-y-auto p-2">
+      <div className={`flex-1 overflow-x-hidden overflow-y-auto p-2 ${zoom > 50 ? 'overflow-x-auto' : ''}`}>
         <PageContainer ref={ref} zoom={zoom}>
           <MinimalTemplate />
         </PageContainer>
