@@ -306,6 +306,7 @@ export interface Translations {
   addProject: string;
   addLanguage: string;  // New: Add Language
   about: string;
+  uploadPhoto: string;
   // Skill levels
   beginner: string;
   elementary: string;
@@ -426,6 +427,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     addProject: 'Add Project',
     addLanguage: 'Add Language',
     about: 'About',
+    uploadPhoto: 'Upload Photo',
     beginner: 'Beginner',
     elementary: 'Elementary',
     intermediate: 'Intermediate',
@@ -550,6 +552,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     addProject: 'Προσθήκη Έργου',
     addLanguage: 'Προσθήκη Γλώσσας',
     about: 'Σχετικά',
+    uploadPhoto: 'Ανέβασμα Φωτογραφίας',
     beginner: 'Αρχάριος',
     elementary: 'Βασικό',
     intermediate: 'Μέτριο',
@@ -674,6 +677,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     addProject: 'Añadir Proyecto',
     addLanguage: 'Añadir Idioma',
     about: 'Acerca de',
+    uploadPhoto: 'Subir Foto',
     beginner: 'Principiante',
     elementary: 'Elemental',
     intermediate: 'Intermedio',
@@ -798,6 +802,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     addProject: 'Ajouter Projet',
     addLanguage: 'Ajouter Langue',
     about: 'À propos',
+    uploadPhoto: 'Télécharger Photo',
     beginner: 'Débutant',
     elementary: 'Élémentaire',
     intermediate: 'Intermédiaire',
@@ -922,6 +927,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     addProject: 'Projekt Hinzufügen',
     addLanguage: 'Sprache Hinzufügen',
     about: 'Über',
+    uploadPhoto: 'Foto Hochladen',
     beginner: 'Anfänger',
     elementary: 'Elementar',
     intermediate: 'Mittelstufe',

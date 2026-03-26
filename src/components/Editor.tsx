@@ -143,7 +143,7 @@ const PersonalInfoEditor: React.FC = () => {
         </div>
         <div className="flex flex-col gap-2">
           <label className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors inline-block">
-            <span>Upload Photo</span>
+            <span>{t.uploadPhoto}</span>
             <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
           </label>
           {personalInfo.photo && (

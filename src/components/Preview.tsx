@@ -432,10 +432,6 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ sectionId, variant = 
   return null;
 };
 
-// A4 page dimensions in pixels (at 96 DPI)
-const A4_HEIGHT = 1123; // 297mm at 96 DPI
-const A4_WIDTH = 794;   // 210mm at 96 DPI
-
 interface PageContainerProps {
   children: React.ReactNode;
   zoom?: number;
@@ -578,7 +574,7 @@ const MinimalTemplate: React.FC = () => {
       {personalInfo.summary && (
         <div className="mb-6 break-inside-avoid" style={{ color: textColor }}>
           <h2 className="font-medium border-b border-gray-200 pb-1 mb-2" style={{ fontSize: `${titleSize}px`, marginTop: `${sectionTitleMarginTop}px`, color }}>{t.about}</h2>
-          <p>{personalInfo.summary}</p>
+          <div className="whitespace-pre-wrap break-words">{personalInfo.summary}</div>
         </div>
       )}
 
