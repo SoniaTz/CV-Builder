@@ -441,32 +441,64 @@ interface PageContainerProps {
   zoom?: number;
 }
 
-// Page Container Component that shows A4 pages
+// Page Container Component that shows A4 pages with proper section-based pagination
 const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children, zoom = 50 }, ref) => {
   const measureRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(2); // Start with 2 pages for testing
+  const [pageCount, setPageCount] = useState(1);
+  const [sectionHeights, setSectionHeights] = useState<number[]>([]);
+  const [pageBreaks, setPageBreaks] = useState<number[]>([0]);
+
+  // A4 height in pixels at 96 DPI
+  const A4_HEIGHT_PX = 1123;
 
   useEffect(() => {
-    const calculatePageCount = () => {
-      // Use setTimeout to ensure DOM is fully rendered and styled
+    const calculatePages = () => {
       setTimeout(() => {
         if (measureRef.current) {
-          const height = measureRef.current.getBoundingClientRect().height;
-          console.log('Content height:', height, 'A4_HEIGHT:', A4_HEIGHT);
-          const pages = Math.max(1, Math.ceil(height / A4_HEIGHT));
-          setPageCount(pages);
+          // Get all sections with break-inside-avoid class
+          const sections = measureRef.current.querySelectorAll('.break-inside-avoid');
+          const heights: number[] = [];
+          
+          sections.forEach((section) => {
+            const rect = section.getBoundingClientRect();
+            // Account for the scale factor (zoom / 50) * 0.47
+            const scale = (zoom / 50) * 0.47;
+            const actualHeight = rect.height / scale;
+            heights.push(actualHeight);
+          });
+          
+          setSectionHeights(heights);
+          
+          // Calculate page breaks based on section heights
+          if (heights.length > 0) {
+            const breaks: number[] = [0];
+            let currentPageHeight = 0;
+            const headerHeight = 200; // Approximate header height
+            let remainingSpace = A4_HEIGHT_PX - headerHeight;
+            
+            heights.forEach((sectionHeight) => {
+              if (sectionHeight > remainingSpace && currentPageHeight > 0) {
+                // Start new page
+                breaks.push(breaks[breaks.length - 1] + 1);
+                currentPageHeight++;
+                remainingSpace = A4_HEIGHT_PX;
+              }
+              remainingSpace -= sectionHeight;
+            });
+            
+            setPageBreaks(breaks);
+            setPageCount(Math.max(1, breaks.length));
+          }
         }
-      }, 100);
+      }, 200);
     };
 
-    // Initial calculation after mount
-    calculatePageCount();
+    calculatePages();
     
-    // Also observe for changes
-    const observer = new ResizeObserver(calculatePageCount);
+    const observer = new ResizeObserver(calculatePages);
     if (measureRef.current) observer.observe(measureRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [zoom]);
 
   // Reference to pass to parent for PDF export
   const pageRef = useRef<HTMLDivElement>(null);
@@ -498,7 +530,11 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
       </div>
       
       {/* Render multiple A4 pages based on content height */}
-      {Array.from({ length: pageCount }).map((_, index) => (
+      {Array.from({ length: Math.max(1, pageCount) }).map((_, index) => {
+        // Calculate which section index this page starts at
+        const sectionStartIndex = pageBreaks[index] || 0;
+        
+        return (
         <div
           key={index}
           ref={index === 0 ? pageRef : undefined}
@@ -508,22 +544,24 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
             height: '297mm',
             maxWidth: '210mm',
             fontSize: '11pt',
-            transform: `scale(${(zoom / 50) * 0.47})`,
             transformOrigin: 'top left',
-            marginBottom: index < pageCount - 1 ? '-585px' : '0'
+            marginBottom: index < pageCount - 1 ? '-585px' : '0',
+            // Position based on which section this page starts at
+            transform: index === 0 
+              ? `scale(${(zoom / 50) * 0.47})` 
+              : `translateY(-${sectionStartIndex * A4_HEIGHT_PX}px) scale(${(zoom / 50) * 0.47})`,
           }}
         >
-          {/* Content wrapper that translates to show different parts on each page */}
+          {/* Content wrapper that shows correct sections for this page */}
           <div
             style={{
-              transform: `translateY(-${index * 297}mm)`,
               width: '210mm'
             }}
           >
             {children}
           </div>
         </div>
-      ))}
+      )})}
     </div>
   );
 });
@@ -573,7 +611,7 @@ const MinimalTemplate: React.FC = () => {
       
       {/* About section - full width */}
       {personalInfo.summary && (
-        <div className="mb-6" style={{ color: textColor }}>
+        <div className="mb-6 break-inside-avoid" style={{ color: textColor }}>
           <h2 className="font-medium border-b border-gray-200 pb-1 mb-2" style={{ fontSize: `${titleSize}px`, marginTop: `${sectionTitleMarginTop}px`, color }}>{t.about}</h2>
           <p>{personalInfo.summary}</p>
         </div>
@@ -582,7 +620,9 @@ const MinimalTemplate: React.FC = () => {
       {/* Full width sections below */}
       <div className="w-full">
         {orderedSections.map((sectionId) => (
-          <SectionRenderer key={sectionId} sectionId={sectionId} variant="minimal" />
+          <div key={sectionId} className="break-inside-avoid">
+            <SectionRenderer key={sectionId} sectionId={sectionId} variant="minimal" />
+          </div>
         ))}
       </div>
     </div>
