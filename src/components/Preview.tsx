@@ -472,7 +472,7 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
   const pageRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="mx-auto" style={{ width: `${A4_WIDTH}px` }}>
+    <div className="mx-auto" style={{ minWidth: `${A4_WIDTH}px`, width: 'fit-content' }}>
       {/* Hidden measurement container - measures full content height without clipping */}
       <div
         ref={(node) => {
