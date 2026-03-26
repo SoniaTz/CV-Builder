@@ -441,56 +441,26 @@ interface PageContainerProps {
   zoom?: number;
 }
 
-// Page Container Component that shows A4 pages with proper section-based pagination
+// Page Container Component that shows A4 pages
 const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children, zoom = 50 }, ref) => {
   const measureRef = useRef<HTMLDivElement>(null);
   const [pageCount, setPageCount] = useState(1);
-  const [sectionHeights, setSectionHeights] = useState<number[]>([]);
-  const [pageBreaks, setPageBreaks] = useState<number[]>([0]);
 
-  // A4 height in pixels at 96 DPI
+  // A4 height in pixels at 96 DPI = 1123px
   const A4_HEIGHT_PX = 1123;
 
   useEffect(() => {
     const calculatePages = () => {
       setTimeout(() => {
         if (measureRef.current) {
-          // Get all sections with break-inside-avoid class
-          const sections = measureRef.current.querySelectorAll('.break-inside-avoid');
-          const heights: number[] = [];
+          const height = measureRef.current.getBoundingClientRect().height;
+          // Account for the scale factor to get actual content height
+          const scale = (zoom / 50) * 0.47;
+          const actualHeight = height / scale;
           
-          sections.forEach((section) => {
-            const rect = section.getBoundingClientRect();
-            // Account for the scale factor (zoom / 50) * 0.47
-            const scale = (zoom / 50) * 0.47;
-            const actualHeight = rect.height / scale;
-            heights.push(actualHeight);
-          });
-          
-          setSectionHeights(heights);
-          
-          // Calculate page breaks based on section heights
-          if (heights.length > 0) {
-            const breaks: number[] = [0];
-            const headerHeight = 200; // Approximate header height
-            let remainingSpace = A4_HEIGHT_PX - headerHeight;
-            
-            heights.forEach((sectionHeight) => {
-              if (sectionHeight > remainingSpace) {
-                // Start new page
-                breaks.push(breaks[breaks.length - 1] + 1);
-                remainingSpace = A4_HEIGHT_PX;
-              }
-              remainingSpace -= sectionHeight;
-            });
-            
-            console.log('Section heights:', heights);
-            console.log('Page breaks:', breaks);
-            console.log('Remaining space:', remainingSpace);
-            
-            setPageBreaks(breaks);
-            setPageCount(Math.max(1, breaks.length));
-          }
+          const pages = Math.max(1, Math.ceil(actualHeight / A4_HEIGHT_PX));
+          console.log('Content height:', actualHeight, 'Page height:', A4_HEIGHT_PX, 'Pages:', pages);
+          setPageCount(pages);
         }
       }, 200);
     };
@@ -507,7 +477,7 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
 
   return (
     <div className="mx-auto" style={{ width: '210mm' }}>
-      {/* Hidden measurement container - measures full content height without clipping */}
+      {/* Hidden measurement container */}
       <div
         ref={(node) => {
           (measureRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
@@ -531,12 +501,8 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
         {children}
       </div>
       
-      {/* Render multiple A4 pages based on content height */}
-      {Array.from({ length: Math.max(1, pageCount) }).map((_, index) => {
-        // Calculate which section index this page starts at
-        const sectionStartIndex = pageBreaks[index] || 0;
-        
-        return (
+      {/* Render multiple A4 pages */}
+      {Array.from({ length: Math.max(1, pageCount) }).map((_, index) => (
         <div
           key={index}
           ref={index === 0 ? pageRef : undefined}
@@ -546,24 +512,21 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
             height: '297mm',
             maxWidth: '210mm',
             fontSize: '11pt',
+            transform: `scale(${(zoom / 50) * 0.47})`,
             transformOrigin: 'top left',
-            marginBottom: index < pageCount - 1 ? '-585px' : '0',
-            // Position based on which section this page starts at
-            transform: index === 0 
-              ? `scale(${(zoom / 50) * 0.47})` 
-              : `translateY(-${sectionStartIndex * A4_HEIGHT_PX}px) scale(${(zoom / 50) * 0.47})`,
+            marginBottom: index < pageCount - 1 ? '-585px' : '0'
           }}
         >
-          {/* Content wrapper that shows correct sections for this page */}
           <div
             style={{
+              transform: `translateY(-${index * 297}mm)`,
               width: '210mm'
             }}
           >
             {children}
           </div>
         </div>
-      )})}
+      ))}
     </div>
   );
 });
