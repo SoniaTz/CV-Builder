@@ -472,19 +472,21 @@ const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children
           // Calculate page breaks based on section heights
           if (heights.length > 0) {
             const breaks: number[] = [0];
-            let currentPageHeight = 0;
             const headerHeight = 200; // Approximate header height
             let remainingSpace = A4_HEIGHT_PX - headerHeight;
             
             heights.forEach((sectionHeight) => {
-              if (sectionHeight > remainingSpace && currentPageHeight > 0) {
+              if (sectionHeight > remainingSpace) {
                 // Start new page
                 breaks.push(breaks[breaks.length - 1] + 1);
-                currentPageHeight++;
                 remainingSpace = A4_HEIGHT_PX;
               }
               remainingSpace -= sectionHeight;
             });
+            
+            console.log('Section heights:', heights);
+            console.log('Page breaks:', breaks);
+            console.log('Remaining space:', remainingSpace);
             
             setPageBreaks(breaks);
             setPageCount(Math.max(1, breaks.length));
