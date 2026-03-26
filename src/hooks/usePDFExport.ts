@@ -68,6 +68,11 @@ export const usePDFExport = () => {
               color: #111827;
               background: white;
             }
+            /* Prevent sections from splitting across pages */
+            .break-inside-avoid {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
             ${styles}
           </style>
         </head>
