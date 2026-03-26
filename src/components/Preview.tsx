@@ -436,8 +436,13 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ sectionId, variant = 
 const A4_HEIGHT = 1123; // 297mm at 96 DPI
 const A4_WIDTH = 794;   // 210mm at 96 DPI
 
+interface PageContainerProps {
+  children: React.ReactNode;
+  zoom?: number;
+}
+
 // Page Container Component that shows A4 pages
-const PageContainer = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+const PageContainer = forwardRef<HTMLDivElement, PageContainerProps>(({ children, zoom = 50 }, ref) => {
   const measureRef = useRef<HTMLDivElement>(null);
   const [pageCount, setPageCount] = useState(2); // Start with 2 pages for testing
 
@@ -484,7 +489,9 @@ const PageContainer = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
           top: 0,
           width: '210mm',
           fontSize: '11pt',
-          background: 'white'
+          background: 'white',
+          transform: `scale(${(zoom / 50) * 0.47})`,
+          transformOrigin: 'top left'
         }}
       >
         {children}
@@ -501,7 +508,7 @@ const PageContainer = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
             height: '297mm',
             maxWidth: '210mm',
             fontSize: '11pt',
-            transform: 'scale(0.47)',
+            transform: `scale(${(zoom / 50) * 0.47})`,
             transformOrigin: 'top left',
             marginBottom: index < pageCount - 1 ? '-585px' : '0'
           }}
@@ -589,11 +596,49 @@ interface PreviewProps {
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(({ onExportPDF }, ref) => {
   const { t } = useCV();
+  const [zoom, setZoom] = useState(50);
+  
   return (
     <div className="w-full sm:w-96 bg-gray-100 border-l border-gray-200 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between shrink-0">
         <h2 className="text-lg font-semibold text-gray-900">{t.livePreview}</h2>
+        <div className="flex items-center gap-2">
+          {/* Zoom Controls */}
+          <button
+            type="button"
+            onClick={() => setZoom(Math.max(25, zoom - 25))}
+            className="p-1.5 rounded hover:bg-gray-100 text-gray-600"
+            title="Zoom out"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            </svg>
+          </button>
+          <span className="text-xs text-gray-500 w-10 text-center">{zoom}%</span>
+          <button
+            type="button"
+            onClick={() => setZoom(Math.min(150, zoom + 25))}
+            className="p-1.5 rounded hover:bg-gray-100 text-gray-600"
+            title="Zoom in"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoom(50)}
+            className="p-1.5 rounded hover:bg-gray-100 text-gray-600 text-xs"
+            title="Reset zoom"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Header - Export Button */}
+      <div className="px-4 py-2 border-b border-gray-200 bg-white flex justify-end shrink-0">
         <button
           type="button"
           onClick={onExportPDF}
@@ -608,7 +653,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(({ onExportPDF }, ref) 
 
       {/* Preview Content - scrollable area */}
       <div className="flex-1 overflow-x-hidden overflow-y-auto p-2">
-        <PageContainer ref={ref}>
+        <PageContainer ref={ref} zoom={zoom}>
           <MinimalTemplate />
         </PageContainer>
       </div>
